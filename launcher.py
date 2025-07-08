@@ -6,16 +6,14 @@ Choose between CLI (CUI) and Desktop GUI versions
 
 import sys
 import os
+import time
 
 def check_dependencies():
     """Check if required dependencies are installed"""
     missing_deps = []
     
-    try:
-        import colorama
-    except ImportError:
-        missing_deps.append("colorama")
-    
+    # Terminal version doesn't need any external dependencies
+    # Only check for GUI dependencies
     try:
         import PyQt5
     except ImportError:
@@ -36,9 +34,10 @@ def show_banner():
 
 🚀 Available Versions:
 
-1️⃣  CUI Version (Command Line Interface)
-    • Colorful terminal-based interface
+1️⃣  Terminal Version (Command Line Interface)
+    • Simple and robust terminal interface
     • Works in any terminal/command prompt
+    • No external dependencies required
     • Lightweight and fast
 
 2️⃣  GUI Version (Desktop Application)
@@ -54,20 +53,45 @@ def show_banner():
 
 def run_cui_version():
     """Run the CUI (terminal) version"""
-    print("🚀 Starting CUI Version...\n")
+    print("🚀 Starting Terminal Version...\n")
+    input("Press Enter to continue...")
+    
     try:
-        import index
-        # The index.py file will run automatically when imported
+        # Import and run the robust terminal typing test
+        import terminal_typing_test
+        terminal_typing_test.terminal_typing_test()
+        
+        # After terminal version finishes, show return message
+        print(f"\n{'-'*60}")
+        print("🎯 Terminal Typing Test completed!")
+        print("🔄 Returning to main launcher menu...")
+        print(f"{'-'*60}")
+        input("Press Enter to return to main menu...")
+        
     except ImportError:
-        print("❌ Error: Could not find index.py file!")
+        print("❌ Error: Could not find terminal_typing_test.py file!")
+        input("Press Enter to return to main menu...")
+    except Exception as e:
+        print(f"❌ Error running terminal version: {e}")
         input("Press Enter to return to main menu...")
 
 def run_gui_version():
     """Run the GUI (desktop) version"""
     print("🚀 Starting Desktop GUI Version...\n")
+    print("📱 The GUI window will open in a moment...")
+    input("Press Enter to continue...")
+    
     try:
         import typing_test_gui
         typing_test_gui.main()
+        
+        # After GUI version finishes, show return message
+        print(f"\n{'-'*60}")
+        print("🖥️ Desktop GUI Typing Test completed!")
+        print("🔄 Returning to main launcher menu...")
+        print(f"{'-'*60}")
+        input("Press Enter to return to main menu...")
+        
     except ImportError as e:
         print(f"❌ Error: Could not start GUI version!")
         print(f"Details: {e}")
@@ -101,10 +125,7 @@ def main():
             choice = input("Enter your choice (1-3): ").strip()
             
             if choice == '1':
-                if 'colorama' in missing_deps:
-                    print("❌ CUI version requires 'colorama'. Please install it first.")
-                    input("Press Enter to continue...")
-                    continue
+                # Terminal version doesn't need any external dependencies
                 run_cui_version()
             
             elif choice == '2':

@@ -48,16 +48,18 @@ class TypingTestGUI(QMainWindow):
     def init_ui(self):
         """Initialize the user interface"""
         self.setWindowTitle("🎯 Desktop Typing Test - Master Your Skills!")
-        self.setGeometry(100, 100, 1000, 700)
+        # Increased window size to ensure all content is visible
+        self.setGeometry(100, 100, 1200, 800)
+        self.setMinimumSize(1000, 700)  # Set minimum size to prevent content cutoff
         
         # Central widget
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         
-        # Main layout
+        # Main layout with reduced spacing
         main_layout = QVBoxLayout(central_widget)
-        main_layout.setSpacing(20)
-        main_layout.setContentsMargins(30, 30, 30, 30)
+        main_layout.setSpacing(15)  # Reduced from 20
+        main_layout.setContentsMargins(20, 20, 20, 20)  # Reduced from 30
         
         # Title and header
         self.create_header(main_layout)
@@ -73,6 +75,7 @@ class TypingTestGUI(QMainWindow):
         header_frame = QFrame()
         header_frame.setObjectName("headerFrame")
         header_layout = QVBoxLayout(header_frame)
+        header_layout.setSpacing(8)  # Reduced spacing
         
         # Main title
         title_label = QLabel("🚀 Desktop Typing Test 🚀")
@@ -99,6 +102,7 @@ class TypingTestGUI(QMainWindow):
         game_frame = QFrame()
         game_frame.setObjectName("gameFrame")
         game_layout = QVBoxLayout(game_frame)
+        game_layout.setSpacing(10)  # Reduced spacing
         
         # Instructions
         instructions_label = QLabel("📖 Read the sentence below and type it as accurately and quickly as possible!")
@@ -111,6 +115,7 @@ class TypingTestGUI(QMainWindow):
         sentence_frame = QFrame()
         sentence_frame.setObjectName("sentenceFrame")
         sentence_layout = QVBoxLayout(sentence_frame)
+        sentence_layout.setSpacing(5)  # Reduced spacing
         
         sentence_title = QLabel("🎯 TARGET SENTENCE")
         sentence_title.setObjectName("sentenceTitle")
@@ -129,6 +134,7 @@ class TypingTestGUI(QMainWindow):
         input_frame = QFrame()
         input_frame.setObjectName("inputFrame")
         input_layout = QVBoxLayout(input_frame)
+        input_layout.setSpacing(5)  # Reduced spacing
         
         input_title = QLabel("✏️ TYPE HERE")
         input_title.setObjectName("inputTitle")
@@ -137,7 +143,8 @@ class TypingTestGUI(QMainWindow):
         
         self.typing_input = QTextEdit()
         self.typing_input.setObjectName("typingInput")
-        self.typing_input.setMaximumHeight(120)
+        self.typing_input.setMaximumHeight(80)  # Reduced from 120
+        self.typing_input.setMinimumHeight(60)  # Set minimum height
         self.typing_input.textChanged.connect(self.on_text_changed)
         input_layout.addWidget(self.typing_input)
         
@@ -145,18 +152,20 @@ class TypingTestGUI(QMainWindow):
         
         # Timer and progress
         progress_layout = QHBoxLayout()
+        progress_layout.setSpacing(15)  # Add spacing
         
         self.timer_label = QLabel("⏱️ Ready to start!")
         self.timer_label.setObjectName("timerLabel")
         progress_layout.addWidget(self.timer_label)
         
-        progress_layout.addSpacerItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        progress_layout.addSpacerItem(QSpacerItem(20, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         
         self.progress_bar = QProgressBar()
         self.progress_bar.setObjectName("progressBar")
         self.progress_bar.setMinimum(0)
         self.progress_bar.setMaximum(100)
         self.progress_bar.setValue(0)
+        self.progress_bar.setMinimumWidth(250)  # Set minimum width
         progress_layout.addWidget(self.progress_bar)
         
         game_layout.addLayout(progress_layout)
@@ -168,11 +177,13 @@ class TypingTestGUI(QMainWindow):
         controls_frame = QFrame()
         controls_frame.setObjectName("controlsFrame")
         controls_layout = QHBoxLayout(controls_frame)
+        controls_layout.setSpacing(15)  # Add consistent spacing
         
         # Statistics panel
         stats_frame = QFrame()
         stats_frame.setObjectName("statsFrame")
         stats_layout = QVBoxLayout(stats_frame)
+        stats_layout.setSpacing(8)  # Reduced spacing
         
         stats_title = QLabel("📊 LIVE STATS")
         stats_title.setObjectName("statsTitle")
@@ -180,6 +191,7 @@ class TypingTestGUI(QMainWindow):
         stats_layout.addWidget(stats_title)
         
         stats_grid = QGridLayout()
+        stats_grid.setSpacing(8)  # Add spacing to grid
         
         # WPM
         stats_grid.addWidget(QLabel("🚀 WPM:"), 0, 0)
@@ -205,6 +217,7 @@ class TypingTestGUI(QMainWindow):
         # Control buttons
         buttons_frame = QFrame()
         buttons_layout = QVBoxLayout(buttons_frame)
+        buttons_layout.setSpacing(8)  # Reduced spacing between buttons
         
         self.start_button = QPushButton("🎮 Start New Round")
         self.start_button.setObjectName("startButton")
@@ -242,100 +255,100 @@ class TypingTestGUI(QMainWindow):
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
                     stop:0 #667eea, stop:1 #764ba2);
                 border: 2px solid #4c63d2;
-                border-radius: 15px;
-                padding: 20px;
-                margin: 10px;
+                border-radius: 12px;
+                padding: 15px;
+                margin: 5px;
             }
             
             #titleLabel {
-                font-size: 28px;
+                font-size: 24px;
                 font-weight: bold;
                 color: white;
                 text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             }
             
             #subtitleLabel {
-                font-size: 16px;
+                font-size: 14px;
                 color: #e0e6ff;
                 font-style: italic;
             }
             
             #roundLabel {
-                font-size: 18px;
+                font-size: 16px;
                 font-weight: bold;
                 color: #ffeb3b;
                 background: rgba(255,255,255,0.1);
-                border-radius: 10px;
-                padding: 5px 15px;
-                margin-top: 10px;
+                border-radius: 8px;
+                padding: 4px 12px;
+                margin-top: 8px;
             }
             
             #gameFrame {
                 background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                     stop:0 #f8f9fa, stop:1 #e9ecef);
                 border: 2px solid #dee2e6;
-                border-radius: 15px;
-                padding: 20px;
-                margin: 10px;
+                border-radius: 12px;
+                padding: 15px;
+                margin: 5px;
             }
             
             #instructionsLabel {
-                font-size: 14px;
+                font-size: 13px;
                 color: #495057;
                 font-weight: bold;
-                padding: 10px;
+                padding: 8px;
             }
             
             #sentenceFrame {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
                     stop:0 #ffeaa7, stop:1 #fab1a0);
-                border: 3px solid #fdcb6e;
-                border-radius: 12px;
-                padding: 15px;
-                margin: 10px 0;
+                border: 2px solid #fdcb6e;
+                border-radius: 10px;
+                padding: 12px;
+                margin: 8px 0;
             }
             
             #sentenceTitle {
-                font-size: 14px;
+                font-size: 13px;
                 font-weight: bold;
                 color: #2d3436;
-                margin-bottom: 10px;
+                margin-bottom: 8px;
             }
             
             #sentenceLabel {
-                font-size: 18px;
+                font-size: 16px;
                 font-weight: bold;
                 color: #2d3436;
-                line-height: 1.4;
-                padding: 10px;
+                line-height: 1.3;
+                padding: 8px;
                 background: rgba(255,255,255,0.7);
-                border-radius: 8px;
+                border-radius: 6px;
             }
             
             #inputFrame {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
                     stop:0 #a8edea, stop:1 #fed6e3);
-                border: 3px solid #00cec9;
-                border-radius: 12px;
-                padding: 15px;
-                margin: 10px 0;
+                border: 2px solid #00cec9;
+                border-radius: 10px;
+                padding: 12px;
+                margin: 8px 0;
             }
             
             #inputTitle {
-                font-size: 14px;
+                font-size: 13px;
                 font-weight: bold;
                 color: #2d3436;
-                margin-bottom: 10px;
+                margin-bottom: 8px;
             }
             
             #typingInput {
-                font-size: 16px;
+                font-size: 15px;
                 font-family: 'Courier New', monospace;
                 background: white;
                 border: 2px solid #74b9ff;
-                border-radius: 8px;
-                padding: 10px;
-                line-height: 1.5;
+                border-radius: 6px;
+                padding: 8px;
+                line-height: 1.4;
             }
             
             #typingInput:focus {
@@ -350,9 +363,9 @@ class TypingTestGUI(QMainWindow):
             }
             
             #progressBar {
-                height: 25px;
+                height: 20px;
                 border: 2px solid #00b894;
-                border-radius: 12px;
+                border-radius: 10px;
                 background: #ddd;
                 text-align: center;
                 color: white;
@@ -362,37 +375,37 @@ class TypingTestGUI(QMainWindow):
             #progressBar::chunk {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
                     stop:0 #00b894, stop:1 #00cec9);
-                border-radius: 10px;
+                border-radius: 8px;
             }
             
             #controlsFrame {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
                     stop:0 #f8f9fa, stop:1 #e9ecef);
                 border: 2px solid #dee2e6;
-                border-radius: 15px;
-                padding: 20px;
-                margin: 10px;
+                border-radius: 12px;
+                padding: 15px;
+                margin: 5px;
             }
             
             #statsFrame {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
                     stop:0 #81ecec, stop:1 #74b9ff);
                 border: 2px solid #0984e3;
-                border-radius: 12px;
-                padding: 15px;
-                margin-right: 20px;
-                min-width: 200px;
+                border-radius: 10px;
+                padding: 12px;
+                margin-right: 15px;
+                min-width: 180px;
             }
             
             #statsTitle {
-                font-size: 16px;
+                font-size: 14px;
                 font-weight: bold;
                 color: #2d3436;
-                margin-bottom: 15px;
+                margin-bottom: 12px;
             }
             
             #wpmLabel, #accuracyLabel {
-                font-size: 18px;
+                font-size: 16px;
                 font-weight: bold;
                 color: #2d3436;
             }
@@ -402,12 +415,12 @@ class TypingTestGUI(QMainWindow):
                     stop:0 #667eea, stop:1 #764ba2);
                 color: white;
                 border: none;
-                border-radius: 8px;
-                padding: 12px 20px;
-                font-size: 14px;
+                border-radius: 6px;
+                padding: 10px 16px;
+                font-size: 13px;
                 font-weight: bold;
-                margin: 5px;
-                min-height: 20px;
+                margin: 3px;
+                min-height: 16px;
             }
             
             QPushButton:hover {

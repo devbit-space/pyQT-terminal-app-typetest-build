@@ -199,17 +199,17 @@ class TypingTestGUI(QMainWindow):
         self.wpm_label.setObjectName("wpmLabel")
         stats_grid.addWidget(self.wpm_label, 0, 1)
         
-        # Accuracy
-        stats_grid.addWidget(QLabel("🎯 Accuracy:"), 1, 0)
-        self.accuracy_label = QLabel("0%")
-        self.accuracy_label.setObjectName("accuracyLabel")
-        stats_grid.addWidget(self.accuracy_label, 1, 1)
-        
         # Time
-        stats_grid.addWidget(QLabel("⏱️ Time:"), 2, 0)
+        stats_grid.addWidget(QLabel("⏱️ Time:"), 1, 0)
         self.time_label = QLabel("0.0s")
         self.time_label.setObjectName("timeLabel")
-        stats_grid.addWidget(self.time_label, 2, 1)
+        stats_grid.addWidget(self.time_label, 1, 1)
+        
+        # Characters per second
+        stats_grid.addWidget(QLabel("⚡ Chars/sec:"), 2, 0)
+        self.cps_label = QLabel("0.0")
+        self.cps_label.setObjectName("cpsLabel")
+        stats_grid.addWidget(self.cps_label, 2, 1)
         
         stats_layout.addLayout(stats_grid)
         controls_layout.addWidget(stats_frame)
@@ -404,7 +404,7 @@ class TypingTestGUI(QMainWindow):
                 margin-bottom: 12px;
             }
             
-            #wpmLabel, #accuracyLabel {
+            #wpmLabel, #cpsLabel {
                 font-size: 16px;
                 font-weight: bold;
                 color: #2d3436;
@@ -470,8 +470,8 @@ class TypingTestGUI(QMainWindow):
         
         # Reset stats
         self.wpm_label.setText("0")
-        self.accuracy_label.setText("0%")
         self.time_label.setText("0.0s")
+        self.cps_label.setText("0.0")
 
     def reset_input(self):
         """Reset the typing input"""
@@ -489,6 +489,42 @@ class TypingTestGUI(QMainWindow):
         user_text = self.typing_input.toPlainText()
         target_text = self.current_sentence
         
+        # Check if the typed text matches the target text so far
+        # If not, revert to the last correct position
+        correct_length = 0
+        for i in range(min(len(user_text), len(target_text))):
+            if user_text[i] == target_text[i]:
+                correct_length += 1
+            else:
+                # Found incorrect character, revert to correct portion
+                correct_text = target_text[:correct_length]
+                # Temporarily disconnect signal to avoid recursion
+                self.typing_input.textChanged.disconnect()
+                self.typing_input.setPlainText(correct_text)
+                # Move cursor to end
+                cursor = self.typing_input.textCursor()
+                cursor.movePosition(cursor.End)
+                self.typing_input.setTextCursor(cursor)
+                # Reconnect signal
+                self.typing_input.textChanged.connect(self.on_text_changed)
+                # Update user_text to the corrected text
+                user_text = correct_text
+                break
+        
+        # If user typed more characters than target, limit to target length
+        if len(user_text) > len(target_text):
+            correct_text = target_text
+            # Temporarily disconnect signal to avoid recursion
+            self.typing_input.textChanged.disconnect()
+            self.typing_input.setPlainText(correct_text)
+            # Move cursor to end
+            cursor = self.typing_input.textCursor()
+            cursor.movePosition(cursor.End)
+            self.typing_input.setTextCursor(cursor)
+            # Reconnect signal
+            self.typing_input.textChanged.connect(self.on_text_changed)
+            user_text = correct_text
+        
         # Calculate progress
         progress = min(100, (len(user_text) / len(target_text)) * 100)
         self.progress_bar.setValue(int(progress))
@@ -497,51 +533,49 @@ class TypingTestGUI(QMainWindow):
         elapsed_time = time.time() - self.start_time
         self.time_label.setText(f"{elapsed_time:.1f}s")
         
-        # Calculate WPM
+        # Calculate WPM and Characters per second
         if elapsed_time > 0:
             words_typed = len(user_text) / 5
             minutes = elapsed_time / 60
             wpm = words_typed / minutes
             self.wpm_label.setText(f"{wpm:.1f}")
-        
-        # Calculate accuracy
-        correct_chars = 0
-        for i in range(min(len(user_text), len(target_text))):
-            if user_text[i] == target_text[i]:
-                correct_chars += 1
-        
-        if len(target_text) > 0:
-            accuracy = (correct_chars / len(target_text)) * 100
-            self.accuracy_label.setText(f"{accuracy:.1f}%")
+            
+            # Calculate characters per second
+            chars_per_second = len(user_text) / elapsed_time
+            self.cps_label.setText(f"{chars_per_second:.1f}")
         
         # Check if completed
         if user_text.strip() == target_text.strip():
-            self.complete_round(elapsed_time, float(self.wpm_label.text()), accuracy)
+            self.complete_round(elapsed_time, float(self.wpm_label.text()))
 
-    def complete_round(self, elapsed_time, wpm, accuracy):
+    def complete_round(self, elapsed_time, wpm):
         """Complete the current round and show results"""
         self.typing_input.setEnabled(False)
+        
+        # Calculate characters per second for this round
+        user_text = self.typing_input.toPlainText()
+        chars_per_second = len(user_text) / elapsed_time if elapsed_time > 0 else 0
         
         # Store stats
         stats = {
             'round': self.round_number,
             'time': elapsed_time,
             'wpm': wpm,
-            'accuracy': accuracy,
+            'cps': chars_per_second,
             'timestamp': datetime.now().isoformat()
         }
         self.stats_history.append(stats)
         
         # Show completion message
-        if wpm >= 60 and accuracy >= 95:
+        if wpm >= 60:
             title = "🏆 EXCELLENT!"
-            message = f"Outstanding performance!\n\nRound {self.round_number} Results:\n⏱️ Time: {elapsed_time:.2f} seconds\n🚀 WPM: {wpm:.1f}\n🎯 Accuracy: {accuracy:.1f}%"
-        elif wpm >= 40 and accuracy >= 85:
+            message = f"Outstanding performance!\n\nRound {self.round_number} Results:\n⏱️ Time: {elapsed_time:.2f} seconds\n🚀 WPM: {wpm:.1f}\n⚡ Chars/sec: {chars_per_second:.1f}"
+        elif wpm >= 40:
             title = "⭐ GOOD JOB!"
-            message = f"Great work!\n\nRound {self.round_number} Results:\n⏱️ Time: {elapsed_time:.2f} seconds\n🚀 WPM: {wpm:.1f}\n🎯 Accuracy: {accuracy:.1f}%"
+            message = f"Great work!\n\nRound {self.round_number} Results:\n⏱️ Time: {elapsed_time:.2f} seconds\n🚀 WPM: {wpm:.1f}\n⚡ Chars/sec: {chars_per_second:.1f}"
         else:
             title = "💪 KEEP PRACTICING!"
-            message = f"You're improving!\n\nRound {self.round_number} Results:\n⏱️ Time: {elapsed_time:.2f} seconds\n🚀 WPM: {wpm:.1f}\n🎯 Accuracy: {accuracy:.1f}%"
+            message = f"You're improving!\n\nRound {self.round_number} Results:\n⏱️ Time: {elapsed_time:.2f} seconds\n🚀 WPM: {wpm:.1f}\n⚡ Chars/sec: {chars_per_second:.1f}"
         
         QMessageBox.information(self, title, message)
         
@@ -556,25 +590,26 @@ class TypingTestGUI(QMainWindow):
         
         # Calculate averages
         avg_wpm = sum(s['wpm'] for s in self.stats_history) / len(self.stats_history)
-        avg_accuracy = sum(s['accuracy'] for s in self.stats_history) / len(self.stats_history)
+        avg_cps = sum(s.get('cps', 0) for s in self.stats_history) / len(self.stats_history)
         total_rounds = len(self.stats_history)
         best_wpm = max(s['wpm'] for s in self.stats_history)
-        best_accuracy = max(s['accuracy'] for s in self.stats_history)
+        best_cps = max(s.get('cps', 0) for s in self.stats_history)
         
         results_text = f"""📈 Your Typing Statistics 📈
 
 📊 Overall Performance:
 • Total Rounds: {total_rounds}
 • Average WPM: {avg_wpm:.1f}
-• Average Accuracy: {avg_accuracy:.1f}%
+• Average Chars/sec: {avg_cps:.1f}
 • Best WPM: {best_wpm:.1f}
-• Best Accuracy: {best_accuracy:.1f}%
+• Best Chars/sec: {best_cps:.1f}
 
 🏆 Recent Rounds:
 """
         
         for i, stats in enumerate(self.stats_history[-5:], 1):
-            results_text += f"Round {stats['round']}: {stats['wpm']:.1f} WPM, {stats['accuracy']:.1f}% accuracy\n"
+            cps_display = f", {stats.get('cps', 0):.1f} chars/sec" if 'cps' in stats else ""
+            results_text += f"Round {stats['round']}: {stats['wpm']:.1f} WPM{cps_display}\n"
         
         QMessageBox.information(self, "📊 Your Statistics", results_text)
 
